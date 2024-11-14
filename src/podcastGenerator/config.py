@@ -34,3 +34,6 @@ intro_start=0
 intro_offset=5000
 outro_offset=3000
 fade_duration=3000
+
+# Base audio amplification gain in dB
+AMPLIFY_GAIN = 10

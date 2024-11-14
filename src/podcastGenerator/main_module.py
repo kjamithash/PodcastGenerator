@@ -36,7 +36,7 @@ def main():
     for filename in os.listdir(config.AUDIO_OUTPUT_PATH):
         if filename.endswith((".mp3", ".wav")):  # Include only audio files
             audio_filepath = os.path.join(config.AUDIO_OUTPUT_PATH, filename)
-            
+            print(f"\nAudio File path: {audio_filepath}")
             # Call the plot function for each audio file and unpack the returned values
             transitions, clicked_points = identify_transition_points(audio_filepath)
             

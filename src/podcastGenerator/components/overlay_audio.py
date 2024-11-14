@@ -18,7 +18,7 @@ def overlay_audio_with_timestamps(
     outro = AudioSegment.from_file(outro_path)
 
     # Step 0: Amplify the original audio
-    amplified_original = original.apply_gain(10.0)  # Amplification level set to 10 dB
+    amplified_original = original.apply_gain(config.AMPLIFY_GAIN)  # Amplification level set to 10 dB
 
     fade_duration = config.fade_duration  # Duration of fade in/out in milliseconds (3 seconds)
     intro = intro.fade_out(fade_duration)

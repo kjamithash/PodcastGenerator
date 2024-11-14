@@ -1,24 +1,45 @@
 import os
 import librosa
+import librosa.display
 import matplotlib.pyplot as plt
-from pydub import AudioSegment, silence
+from pydub import AudioSegment
 import numpy as np
-from src.podcastGenerator.utils.format_time import format_time
 from src.podcastGenerator.utils.find_nearest_gap import find_nearest_gap
 
 def identify_transition_points(audio_path, rms_threshold=0.015, gap_duration=1.35, frame_length=1024, hop_length=512):
     # Extract the filename from the audio path (for use in the plot title)
     filename = os.path.basename(audio_path)
 
-    # Load audio and calculate RMS
-    y, sr = librosa.load(audio_path, sr=None)
-    rms = librosa.feature.rms(y=y, frame_length=frame_length, hop_length=hop_length)[0]
-    rms_time_axis = librosa.times_like(rms, sr=sr, hop_length=hop_length)
+    # Ensure the file exists
+    if not os.path.exists(audio_path):
+        raise FileNotFoundError(f"The audio file at {audio_path} does not exist.")
     
+    # Check if the file can be read by pydub
+    try:
+        audio = AudioSegment.from_mp3(audio_path)
+        print(f"Loaded audio with {len(audio)} milliseconds duration.")
+    except Exception as e:
+        raise ValueError(f"Error loading audio with pydub: {e}")
+    
+    # Load audio with librosa and check for empty file
+    y, sr = librosa.load(audio_path, sr=None)
+    print(f"Loaded audio with {len(y)} samples and {sr} sample rate.")
+    if len(y) == 0:
+        raise ValueError(f"Loaded audio has zero samples. Check the audio file: {audio_path}")
+    
+    # Check for silence in the audio
+    if np.sum(np.abs(y)) == 0:
+        raise ValueError("The audio file is silent or has zero amplitude.")
+    
+    # Compute RMS
+    rms = librosa.feature.rms(y=y, frame_length=frame_length, hop_length=hop_length)[0]
+    print(f"RMS values: {rms[:10]}...")  # Print first 10 RMS values for inspection
+    
+    rms_time_axis = librosa.times_like(rms, sr=sr, hop_length=hop_length)
+
     # Detect silence segments
     silent_segments = []
     current_silence_start = None
-
     for i, rms_value in enumerate(rms):
         if rms_value < rms_threshold:
             if current_silence_start is None:
@@ -29,30 +50,18 @@ def identify_transition_points(audio_path, rms_threshold=0.015, gap_duration=1.3
                 if silence_duration >= gap_duration:
                     silent_segments.append((current_silence_start, rms_time_axis[i]))
                 current_silence_start = None
-
+    
     # Check for trailing silence
     if current_silence_start is not None:
         silence_duration = rms_time_axis[-1] - current_silence_start
         if silence_duration >= gap_duration:
             silent_segments.append((current_silence_start, rms_time_axis[-1]))
 
-    # Define target times for transition points
-    target_times = [50, 80, 105]
     transitions = {
         "transition1_start_1": None,
         "transition2_start": None,
         "transition1_start_2": None
     }
-
-    for target_time in target_times:
-        start, end = find_nearest_gap(silent_segments, target_time)
-        if start is not None:
-            if target_time == 50:
-                transitions["transition1_start_1"] = start
-            elif target_time == 80:
-                transitions["transition2_start"] = start
-            elif target_time == 105:
-                transitions["transition1_start_2"] = start
 
     # Set up the plot
     fig, ax = plt.subplots(figsize=(14, 6))
@@ -66,7 +75,7 @@ def identify_transition_points(audio_path, rms_threshold=0.015, gap_duration=1.3
     for start, end in silent_segments:
         ax.axvspan(start, end, color='red', alpha=0.3, label="Silence Gap" if start == silent_segments[0][0] else "")
 
-    # Highlight existing transition points
+       # Highlight existing transition points
     for label, time in transitions.items():
         if time is not None:
             ax.axvline(x=time, color='green', linestyle='--', label=f"{label} at {time:.2f}s")
