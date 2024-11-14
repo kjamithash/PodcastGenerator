@@ -1,4 +1,4 @@
-# Podcast Generator using LLMs and Text2Speech, incl. automated audio post-processing. 
+# AI Podcast Generator using LLMs and Text2Speech, incl. automated audio post-processing. 
 
 The Podcast Generator project automates the creation of podcast episodes on Mental Models. It generates transcripts, converts them to audio files, identifies transition points, and overlays custom audio for seamless transitions.
 
