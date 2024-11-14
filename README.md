@@ -5,12 +5,20 @@ The Podcast Generator project automates the creation of podcast episodes on Ment
 This project currently uses the Anthropic Claude 3.5 model API for transcript generation; ElevenLabs API for text to speech generation. The code is used to automate podcast creation of The Mental Models Daily Podcast. 
 
 Example outputs of this code can be found here:
+
 Youtube: https://www.youtube.com/@MentalModelsDaily/podcasts 
+
 Spotify: https://open.spotify.com/show/1f0qi12saeBEJmtnjOSszg 
+
 Amazon Music: https://music.amazon.co.uk/podcasts/6da552cf-1714-45ce-b302-7c6c69386fc3/mental-models-daily
+
 Apple Podcasts: https://podcasts.apple.com/gb/podcast/mental-models-daily/id1754257683
+
 Castbox: https://castbox.fm/channel/Mental-Models-Daily-id6203840?country=us
+
 iHeartRadio: https://www.iheart.com/podcast/269-mental-models-daily-189536773/
+
+![alt text](image-1.png)
 
 ## Project Structure
 
