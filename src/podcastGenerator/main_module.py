@@ -1,19 +1,18 @@
 # Main module entry point
 import os
-from podcastGenerator.src.podcastGenerator import config
-from podcastGenerator.src.podcastGenerator.utils.transcript_generator import generate_transcripts
-from podcastGenerator.src.podcastGenerator.utils.read_text import read_text_from_docx
-from podcastGenerator.src.podcastGenerator.utils.audio_generator import convert_text_to_audio
-from podcastGenerator.src.podcastGenerator.utils.plot_audio import identify_transition_points
-from podcastGenerator.src.podcastGenerator.utils.overlay_audio import overlay_audio_with_timestamps
+from src.podcastGenerator import config
+from src.podcastGenerator.components.transcript_generator import generate_transcripts
+from src.podcastGenerator.utils.read_text import read_text_from_docx
+from src.podcastGenerator.components.audio_generator import convert_text_to_audio
+from src.podcastGenerator.components.plot_audio import identify_transition_points
+from src.podcastGenerator.components.overlay_audio import overlay_audio_with_timestamps
 
 # Main function to generate and save transcripts and audio files
 def main():
-    # List of mental models for which you want to create transcripts and audio
-    mental_models = ["War of Attrition", "Winning Hearts and Minds"]
     
     # Generate transcripts for each mental model
-    transcripts = generate_transcripts(mental_models, config.TRANSCRIPTS_OUTPUT_PATH)
+    # Make sure you have defined the right mental modles in config.py
+    transcripts = generate_transcripts(config.MENTAL_MODELS, config.TRANSCRIPTS_OUTPUT_PATH)
 
     # Convert each transcript to and audio file and save it
     # Loop through .docx files in the transcript directory
