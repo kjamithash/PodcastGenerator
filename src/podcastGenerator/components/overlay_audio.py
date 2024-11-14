@@ -37,13 +37,13 @@ def overlay_audio_with_timestamps(
     base_audio = base_audio.overlay(amplified_original, position=overlay_start)
 
     # Step 4: Overlay transition1 at specified position
-    base_audio = base_audio.overlay(transition1, position=config.intro_offset + transition1_start_1 * 1000)
+    base_audio = base_audio.overlay(transition1, position=config.intro_offset + transition1_start_1 * config.sec2ms)
 
     # Step 5: Overlay transition2 at specified position
-    base_audio = base_audio.overlay(transition2, position=config.intro_offset + transition2_start * 1000)
+    base_audio = base_audio.overlay(transition2, position=config.intro_offset + transition2_start * config.sec2ms)
 
     # Step 6: Overlay transition1 again at another specified position
-    base_audio = base_audio.overlay(transition1, position=config.intro_offset + transition1_start_2 * 1000)
+    base_audio = base_audio.overlay(transition1, position=config.intro_offset + transition1_start_2 * config.sec2ms)
 
     # Step 7: Extend the base_audio to match the length of the amplified_original plus outro duration
     outro = outro.fade_in(fade_duration)

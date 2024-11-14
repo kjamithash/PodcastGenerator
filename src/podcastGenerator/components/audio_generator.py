@@ -19,9 +19,9 @@ def convert_text_to_audio(text, filename):
     payload = {
         "text": text,
         "voice_settings": {
-            "stability": 0.5,
-            "similarity_boost": 0.7,
-            "style_exaggeration": 5
+            "stability": config.STABILITY,
+            "similarity_boost": config.SIMILARITY_BOOST,
+            "style_exaggeration": config.STYLE_EXXAGGERATION
         }
     }
 

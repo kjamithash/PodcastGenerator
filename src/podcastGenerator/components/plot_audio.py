@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 from pydub import AudioSegment
 import numpy as np
 from src.podcastGenerator.utils.find_nearest_gap import find_nearest_gap
+from src.podcastGenerator import config  # Ensure config is imported
 
-def identify_transition_points(audio_path, rms_threshold=0.015, gap_duration=1.35, frame_length=1024, hop_length=512):
+def identify_transition_points(audio_path, rms_threshold=config.RMS_THRESHOLD, gap_duration=config.GAP_DURATION, frame_length=config.FRAME_LENGTH, hop_length=config.HOP_LENGTH):
     # Extract the filename from the audio path (for use in the plot title)
     filename = os.path.basename(audio_path)
 
