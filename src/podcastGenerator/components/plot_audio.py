@@ -3,8 +3,8 @@ import librosa
 import matplotlib.pyplot as plt
 from pydub import AudioSegment, silence
 import numpy as np
-from podcastGenerator.src.podcastGenerator.utils.format_time import format_time
-from podcastGenerator.src.podcastGenerator.utils.find_nearest_gap import find_nearest_gap
+from src.podcastGenerator.utils.format_time import format_time
+from src.podcastGenerator.utils.find_nearest_gap import find_nearest_gap
 
 def identify_transition_points(audio_path, rms_threshold=0.015, gap_duration=1.35, frame_length=1024, hop_length=512):
     # Extract the filename from the audio path (for use in the plot title)

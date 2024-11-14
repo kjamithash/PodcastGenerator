@@ -1,6 +1,6 @@
 import requests
-from podcastGenerator.src.podcastGenerator.config import ELEVEN_LABS_API_KEY
-from podcastGenerator.src.podcastGenerator import config
+from src.podcastGenerator.config import ELEVEN_LABS_API_KEY
+from src.podcastGenerator import config
 
 # Function to convert text to audio using the Eleven Labs API
 def convert_text_to_audio(text, filename):
