@@ -1,5 +1,6 @@
 from langchain import PromptTemplate, LLMChain
 from langchain_anthropic import ChatAnthropic
+from src.podcastGenerator import config
 from docx import Document
 import logging
 import os
@@ -151,10 +152,10 @@ def generate_transcripts(mental_models, output_path):
     
     # Initialize the LLM with increased timeout and retries
     llm = ChatAnthropic(
-        model="claude-3-5-sonnet-latest",
-        temperature=0.7,
-        max_retries=3,
-        timeout=300  # 5 minute timeout
+        model=config.MODEL,
+        temperature=config.TEMPERATURE,
+        max_retries=config.MAX_RETRIES,
+        timeout=config.TIMEOUT  # 5 minute timeout
     )
     
     # Create the chain
@@ -164,7 +165,7 @@ def generate_transcripts(mental_models, output_path):
     )
     
     transcripts = {}
-    break_duration = "1.3s"
+    break_duration = config.TRANSCRIPT_BREAK_DURATION
     
     for model in mental_models:
         try:
