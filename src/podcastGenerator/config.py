@@ -3,7 +3,15 @@ import os
 from pydub import AudioSegment
 
 # Define Mental Models
-MENTAL_MODELS = ["Bait and Switch", "Bandwagon Effect"]
+MENTAL_MODELS = [
+"Bait and Switch",
+"Bandwagon Effect",
+"Bias from Incentives",
+"Blind Spot Bias",
+"Broken Windows Theory",
+"Bystander Effect",
+"Cargo Cult"
+]
 
 # Configuration for API keys
 # Retrieves API keys from environment variables for security and flexibility

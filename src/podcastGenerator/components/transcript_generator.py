@@ -80,7 +80,7 @@ Style Guidelines:
 - Each analogy should start with "It's like..."
 - Every example should include specific details and outcomes
 - Use transitions between sections to maintain flow
-- Keep the total length similar to approximately 750 to 900 words
+- Keep the total length to approximately 900 to 1100 words
 - Maintain consistent voice and energy throughout
 
 Generate a transcript that follows this structure exactly for {model_name}:"""
