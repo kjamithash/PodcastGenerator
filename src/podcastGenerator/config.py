@@ -3,7 +3,15 @@ import os
 from pydub import AudioSegment
 
 # Define Mental Models
-MENTAL_MODELS = ["War of Attrition", "Winning Hearts and Minds"]
+MENTAL_MODELS = [
+"Bait and Switch",
+"Bandwagon Effect",
+"Bias from Incentives",
+"Blind Spot Bias",
+"Broken Windows Theory",
+"Bystander Effect",
+"Cargo Cult"
+]
 
 # Configuration for API keys
 # Retrieves API keys from environment variables for security and flexibility
@@ -11,7 +19,7 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 ELEVEN_LABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 # LLM settings
-MODEL = "claude-3-5-sonnet-latest",
+MODEL = "claude-3-5-sonnet-latest"
 TEMPERATURE = 0.7
 MAX_RETRIES = 3
 TIMEOUT = 300  # 5 minute timeout
@@ -47,8 +55,9 @@ outro_path = "data/raw/audio/MUG-TPH-001 - OUTRO.wav"
 intro_start=0
 intro_offset=5000
 outro_offset=3000
-fade_duration=3000
+fade_duration=5000
 sec2ms=1000
 
 # Base audio amplification gain in dB
 AMPLIFY_GAIN = 10
+ATTENUATION_GAIN = -8

@@ -17,11 +17,16 @@ def overlay_audio_with_timestamps(
     transition2 = AudioSegment.from_file(transition2_path)
     outro = AudioSegment.from_file(outro_path)
 
-    # Step 0: Amplify the original audio
+    # Step 0: Adjust amplification and attenuation levels
     amplified_original = original.apply_gain(config.AMPLIFY_GAIN)  # Amplification level set to 10 dB
 
     fade_duration = config.fade_duration  # Duration of fade in/out in milliseconds (3 seconds)
     intro = intro.fade_out(fade_duration)
+
+    intro = intro.apply_gain(config.ATTENUATION_GAIN)
+    transition1 = transition1.apply_gain(config.ATTENUATION_GAIN)
+    transition2 = transition2.apply_gain(config.ATTENUATION_GAIN)
+    outro = outro.apply_gain(config.ATTENUATION_GAIN)
 
     # Step 1: Start with the intro audio and set up base_audio
     base_audio = intro
@@ -62,5 +67,6 @@ def overlay_audio_with_timestamps(
 
     # Save the audio to the specified output path
     output_path = os.path.join(config.PROCESSED_AUDIO_OUTPUT_PATH, output_filename)
+    os.makedirs(config.PROCESSED_AUDIO_OUTPUT_PATH, exist_ok=True)  # Ensure output directory exists
     base_audio.export(output_path, format="mp3")
     print(f"Final audio saved as '{output_path}'")
