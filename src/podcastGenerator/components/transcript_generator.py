@@ -1,94 +1,71 @@
-from langchain import PromptTemplate, LLMChain
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 from langchain_anthropic import ChatAnthropic
+from typing import Dict, List
+from langchain_core.runnables import RunnablePassthrough
 from src.podcastGenerator import config
 from docx import Document
-import logging
 import os
 from pathlib import Path
-import time
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_exponential,
-    retry_if_exception_type
-)
 
-def setup_logging():
-    """Configure logging for the transcript generator."""
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
+def get_improved_prompt_template() -> PromptTemplate:
+    """Create an improved prompt template for high-quality transcript generation."""
+    template = """You are the host of Mental Models Daily, a podcast dedicated to explaining one mental model each day to help listeners elevate their decision making. Your task is to create a transcript for a podcast episode about {model_name}.
 
-def clean_transcript(transcript: str, model_name: str) -> str:
-    """
-    Clean the transcript by removing unwanted lines and ensuring proper outro.
-    
-    Args:
-        transcript (str): Raw transcript from the LLM
-        model_name (str): Name of the mental model
-        
-    Returns:
-        str: Cleaned transcript
-    """
-    # Split into lines for processing
-    lines = transcript.split('\n')
-    
-    # Remove the first line if it contains helper text
-    if any(phrase in lines[0].lower() for phrase in [
-        "let me help",
-        "i'll create",
-        "here's a transcript",
-        "i'll write",
-        "let me write"
-    ]):
-        lines = lines[1:]
-    
-    # Replace outro placeholder with standard outro
-    standard_outro = (
-        "For more mental models, please visit mentalmodelsdaily.com or "
-        "find us on X or Instagram. Our Podcast music was provided by "
-        "thePodcasthost.com & Alitu: The Podcast Maker. Find your own free "
-        "podcast music over at thePodcasthost.com/freemusic."
-    )
-    
-    # Remove any existing outro placeholders or incomplete outros
-    while lines and any(phrase in lines[-1].lower() for phrase in [
-        "[outro",
-        "outro:",
-        "for more mental models",
-        "mentalmodelsdaily.com"
-    ]):
-        lines.pop()
-    
-    # Add the standard outro
-    lines.append(standard_outro)
-    
-    # Join lines back together
-    cleaned_transcript = '\n'.join(lines).strip()
-    
-    return cleaned_transcript
+Follow this exact structure:
 
-def get_prompt_template() -> PromptTemplate:
-    """Create the prompt template for transcript generation."""
-    template = """You are a podcast host for Mental Models Daily, where you explain one mental model each day. 
-Your task is to create a transcript for a podcast episode about {model_name}.
+1. Opening (Standard Welcome):
+"Welcome to Mental Models Daily, where we explore one mental model each day to help you elevate your daily decision making. Today, we're diving into [introduce model in an intriguing way]: {model_name}."
 
-Follow this exact structure and style from the Super Forecasters example:
+2. Core Concept Definition:
+- Define the concept clearly and simply
+- Use a primary analogy that captures the essence ("It's like...")
+- Explain why this concept matters in decision making
 
-1. Start with a warm welcome and introduce the mental model in an engaging way that hooks the listener
-2. Explain the core concept clearly and simply, using a relatable analogy ("It's like...")
-3. Share a compelling historical example that illustrates the model
-4. Provide a modern business example showing practical application
-5. Give three specific ways to apply this in daily life, each with a relatable analogy
-6. Conclude by summarizing the key insights and value of the model
-7. End with the standard sign-off
+<break time="{break_duration}" />
 
-Use a conversational, engaging tone throughout. Include natural transitions between sections and "It's like..." analogies to make concepts more relatable.
+3. Historical Example:
+- Choose one compelling historical example that clearly demonstrates the model
+- Explain what happened and why it matters
+- Include a relatable analogy to make the example more memorable
+- Focus on specific details and outcomes
 
-Each section should be separated by: <break time="{break_duration}" />
+<break time="{break_duration}" />
 
-Here's your transcript for {model_name}:"""
+4. Modern Business Application:
+- Select a contemporary business example (preferably within last 20 years)
+- Show how the mental model explains success or failure
+- Include specific numbers or outcomes where possible
+- Add a relatable analogy to reinforce the point
+
+<break time="{break_duration}" />
+
+5. Practical Applications:
+Start with: "Let's explore three practical ways to [use/apply/combat] [mental model] in our daily lives:"
+
+For each application:
+- Make it specific and actionable
+- Include a clear example
+- Add a unique "It's like..." analogy
+- Focus on practical implementation
+
+6. Conclusion:
+- Summarize the key insights about the mental model
+- Emphasize its practical value in decision making
+- End with a thematic sign-off related to the model
+
+7. Standard Outro:
+"For more mental models, please visit mentalmodelsdaily.com or find us on X or Instagram. Our Podcast music was provided by thePodcasthost.com & Alitu: The Podcast Maker. Find your own free podcast music over at thePodcasthost.com/freemusic."
+
+Style Guidelines:
+- Use a conversational, engaging tone throughout
+- Each analogy should start with "It's like..."
+- Every example should include specific details and outcomes
+- Use transitions between sections to maintain flow
+- Keep the total length similar to the Anchoring and Analysis Paralysis examples
+- Maintain consistent voice and energy throughout
+
+Generate a transcript that follows this structure exactly for {model_name}:"""
 
     return PromptTemplate(
         input_variables=["model_name", "break_duration"],
@@ -105,90 +82,106 @@ def save_transcript(transcript: str, output_path: str, model_name: str):
     model_name_lower = model_name.lower().replace(" ", "-")
     file_path = os.path.join(output_path, f"{model_name_lower}_transcript.docx")
     doc.save(file_path)
-    logging.info(f"Transcript saved to {file_path}")
 
-@retry(
-    retry=retry_if_exception_type((Exception)),
-    wait=wait_exponential(multiplier=1, min=4, max=60),
-    stop=stop_after_attempt(5),
-    before_sleep=lambda retry_state: logging.info(
-        f"Retrying after attempt {retry_state.attempt_number} in {retry_state.next_action.sleep} seconds..."
-    )
-)
-def generate_single_transcript(llm_chain, model_name: str, break_duration: str) -> str:
-    """Generate a single transcript with retry logic."""
-    try:
-        transcript = llm_chain.run({
-            "model_name": model_name,
-            "break_duration": break_duration
-        })
-        
-        # Ensure sign-off is included
-        if "For more mental models, please visit mentalmodelsdaily.com" not in transcript:
-            sign_off = ("\nFor more mental models, please visit mentalmodelsdaily.com or "
-                      "find us on X or Instagram. Our Podcast music was provided by "
-                      "thePodcasthost.com & Alitu: The Podcast Maker. Find your own free "
-                      "podcast music over at thePodcasthost.com/freemusic.")
-            transcript += sign_off
-            
-        return transcript
-        
-    except Exception as e:
-        logging.error(f"Error generating transcript: {str(e)}")
-        raise
+def clean_transcript(transcript: str) -> str:
+    """Clean and format the transcript to match the desired output format."""
+    
+    # Define standard components
+    STANDARD_WELCOME = "Welcome to Mental Models Daily, where we explore one mental model each day"
+    STANDARD_OUTRO = ("For more mental models, please visit mentalmodelsdaily.com or "
+                     "find us on X or Instagram. Our Podcast music was provided by "
+                     "thePodcasthost.com & Alitu: The Podcast Maker. Find your own free "
+                     "podcast music over at thePodcasthost.com/freemusic.")
+    
+    # Clean up the transcript
+    lines = transcript.splitlines()
+    
+    # Remove any empty lines at the start
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    
+    # Ensure standard welcome
+    if not lines[0].startswith(STANDARD_WELCOME):
+        lines.insert(0, STANDARD_WELCOME)
+    
+    # Clean up break tags
+    lines = [line.strip() for line in lines]
+    lines = [line for line in lines if line]
+    
+    # Ensure proper break tag format
+    lines = [line.replace('<break>', '<break time="1.3s" />') for line in lines]
+    
+    # Ensure standard outro
+    if STANDARD_OUTRO not in transcript:
+        lines.append(STANDARD_OUTRO)
+    
+    # Join lines with proper spacing
+    cleaned_transcript = '\n\n'.join(lines)
+    
+    # Fix any common formatting issues
+    cleaned_transcript = (cleaned_transcript
+        .replace("\\'", "'")
+        .replace('\\n', '\n')
+        .replace('\\', '')
+        .replace('<break time="1.3s" />', '\n<break time="1.3s" />\n'))
+    
+    return cleaned_transcript
 
-def generate_transcripts(mental_models, output_path):
-    """
-    Generate transcripts for the given mental models with improved error handling.
+def validate_transcript(transcript: str) -> bool:
+    """Validate that the transcript meets all quality requirements."""
+    required_elements = [
+        "Welcome to Mental Models Daily",
+        "It's like",
+        "<break time=\"1.3s\" />",
+        "Let's explore three",
+        "mentalmodelsdaily.com"
+    ]
     
-    Args:
-        mental_models (list): List of mental model names to generate transcripts for
-        output_path (str): Path where transcript files should be saved
-        
-    Returns:
-        dict: Dictionary mapping model names to their generated transcripts
-    """
-    setup_logging()
+    return all(element in transcript for element in required_elements)
+
+def generate_transcripts(mental_models: List[str], output_path: str) -> Dict[str, str]:
+    """Generate high-quality transcripts with improved structure and consistency."""
     
-    # Initialize the LLM with increased timeout and retries
     llm = ChatAnthropic(
-        model=config.MODEL,
-        temperature=config.TEMPERATURE,
-        max_retries=config.MAX_RETRIES,
-        timeout=config.TIMEOUT  # 5 minute timeout
+        model = config.MODEL,
+        temperature = config.TEMPERATURE
     )
     
-    # Create the chain
-    llm_chain = LLMChain(
-        prompt=get_prompt_template(),
-        llm=llm
+    # Create the prompt template
+    prompt = get_improved_prompt_template()
+    
+    # Create the chain using the new syntax
+    chain = (
+        RunnablePassthrough() 
+        | prompt 
+        | llm 
+        | StrOutputParser()
     )
     
     transcripts = {}
     break_duration = config.TRANSCRIPT_BREAK_DURATION
     
     for model in mental_models:
-        try:
-            logging.info(f"Starting transcript generation for {model}")
-            
-            # Generate with retry logic
-            transcript = generate_single_transcript(llm_chain, model, break_duration)
-
-            # Clean the transcript
-            cleaned_transcript = clean_transcript(transcript, model)
-            
-            # Save successful transcript
-            save_transcript(cleaned_transcript, output_path, model)
+        # Invoke the chain with the input dictionary
+        transcript = chain.invoke({
+            "model_name": model,
+            "break_duration": break_duration
+        })
+        
+        cleaned_transcript = clean_transcript(transcript)
+        
+        if validate_transcript(cleaned_transcript):
             transcripts[model] = cleaned_transcript
-            
-            logging.info(f"Successfully generated and saved transcript for {model}")
-            
-            # Add a delay between requests to avoid rate limiting
-            if model != mental_models[-1]:  # Don't delay after the last model
-                time.sleep(2)
-                
-        except Exception as e:
-            logging.error(f"Failed to generate transcript for {model} after all retries: {str(e)}")
-            continue
+            save_transcript(cleaned_transcript, output_path, model)
+        else:
+            # Retry with more explicit instructions if validation fails
+            transcript = chain.invoke({
+                "model_name": model,
+                "break_duration": break_duration,
+                "additional_context": "Please ensure all required elements are included."
+            })
+            cleaned_transcript = clean_transcript(transcript)
+            transcripts[model] = cleaned_transcript
+            save_transcript(cleaned_transcript, output_path, model)
     
     return transcripts
