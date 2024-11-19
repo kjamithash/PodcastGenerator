@@ -3,7 +3,7 @@ import os
 from pydub import AudioSegment
 
 # Define Mental Models
-MENTAL_MODELS = ["War of Attrition", "Winning Hearts and Minds"]
+MENTAL_MODELS = ["Bait and Switch", "Bandwagon Effect"]
 
 # Configuration for API keys
 # Retrieves API keys from environment variables for security and flexibility
@@ -11,7 +11,7 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 ELEVEN_LABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 # LLM settings
-MODEL = "claude-3-5-sonnet-latest",
+MODEL = "claude-3-5-sonnet-latest"
 TEMPERATURE = 0.7
 MAX_RETRIES = 3
 TIMEOUT = 300  # 5 minute timeout
