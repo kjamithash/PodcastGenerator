@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Database files
+*.db
+*.db-journal
+*.db.bak
+mental_models copy.db
+
+# Generated transcripts
+generated_transcripts/
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Excel temporary files
+~$*.xlsx
+~$*.xls
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation (generated reports)
+DATABASE_ANALYSIS.md
+FIXES_APPLIED.md
+FUZZY_MATCHING_RESULTS.md
+RESCAN_RESULTS.md
+TRANSCRIPT_ISSUE_ANALYSIS.md
+missing_transcripts.csv
+
+# Backup scripts (keep only main scripts)
+clear_and_rescan.py
+fix_database.py
+fix_invalid_transcripts.py
+match_by_calendar_week.py
+match_by_episode_title.py
+rescan_and_match_transcripts.py
+review_unmatched_blocks.py
+scan_transcripts.py
+list_missing_transcripts.py

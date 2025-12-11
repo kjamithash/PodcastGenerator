@@ -1,0 +1,16 @@
+# Mental Models Database Generator Requirements
+
+# Core dependencies
+openai-whisper>=20231117
+python-docx>=1.0.0
+openpyxl>=3.1.0
+feedparser>=6.0.0
+
+# Whisper dependencies (automatically installed with openai-whisper)
+torch>=2.0.0
+numpy>=1.20.0
+tqdm>=4.60.0
+tiktoken>=0.3.0
+
+# Optional: for better performance
+numba>=0.57.0
